@@ -30,11 +30,11 @@ public class ModeloDatos {
     
     private ModeloDatos(){
      
-    	 hostname = "69.195.124.204";
+    	 hostname = "sql4.freemysqlhosting.net";
          portnumber = "3306";
-         database = "grufacar_pruebasdb";
-         username = "grufacar_kelvin";
-         password = "kj4233pb";
+         database = "sql459243";
+         username = "sql459243";
+         password = "xY1!aB3!";
          
          url = "jdbc:mysql://"+hostname+":"+portnumber+"/"+database+"?user="+username+"&password="+password;
          

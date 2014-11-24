@@ -11,11 +11,6 @@ package Modelo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.List;
-import java.sql.Statement;
-import java.util.ArrayList;
 
 
 /**
@@ -25,23 +20,25 @@ import java.util.ArrayList;
 public class ModeloDatos {
     
     private Connection conn; 
-    private String hostname;
-    private String portnumber;
-    private String database;
-    private String username;
-    private String password;
-    private String url;
+    private final String hostname;
+    private final String portnumber;
+    private final String database;
+    private final String username;
+    private final String password;
+    private final String url;
     private static ModeloDatos modelo;
     
     private ModeloDatos(){
-        hostname = "localhost";
-        portnumber = "80";
-        database = "pruebasdb";
-        username = "root";
-        password = "";
-        
-        url = "jdbc:mysql://"+hostname+/*":"+portnumber+*/"/"+database+"?user="+username+"&password="+password;
-        
+     
+    	 hostname = "69.195.124.204";
+         portnumber = "3306";
+         database = "grufacar_pruebasdb";
+         username = "grufacar_kelvin";
+         password = "kj4233pb";
+         
+         url = "jdbc:mysql://"+hostname+":"+portnumber+"/"+database+"?user="+username+"&password="+password;
+         
+    
         //loadDriver();
     
     }
@@ -58,10 +55,19 @@ public class ModeloDatos {
        try{
            Class.forName("com.mysql.jdbc.Driver").newInstance();
        }
-       catch(Exception e){
+       catch(ClassNotFoundException e){
+           e.printStackTrace();
            System.out.println("error en la carga de driver");
            System.exit(1);
-       }
+       } catch (InstantiationException e) {
+           e.printStackTrace();
+           System.out.println("error en la carga de driver");
+           System.exit(1);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            System.out.println("error en la carga de driver");
+            System.exit(1);
+        }
    }
    
    public void connectar() throws SQLException{

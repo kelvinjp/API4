@@ -21,6 +21,6 @@ public class Application  extends SpringBootServletInitializer {
         return application.sources(applicationClass);
     }
 
-    private static Class<Application> applicationClass = Application.class;
+    private static final Class<Application> applicationClass = Application.class;
     
 }

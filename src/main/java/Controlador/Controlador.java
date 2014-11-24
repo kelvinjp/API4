@@ -32,11 +32,6 @@ public class Controlador {
 }
      
         
-   
-         
-     
-    
-    
     /*
     -------------------------------------------------Cliente------------------------------------------------------------
     */
@@ -62,7 +57,7 @@ public class Controlador {
          
          
          
-        PreparedStatement pstmt1 = null;
+        PreparedStatement pstmt1;
         ModeloDatos md = ModeloDatos.getInstance();
       /*
         hacemos un insert a la base de datos con los paramentros recibidos 

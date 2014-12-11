@@ -6,9 +6,7 @@
 
 package Controlador;
 
-import java.util.Date;
 import java.util.ArrayList;
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 
 /**
  *
@@ -18,9 +16,21 @@ public class Pedido {
     private int idpedido;
     private String correo;
     private int estado;
+    private String ip; 
     private ArrayList<comidasxpedido> orden; 
     
 
+       public String getIp() {
+        return ip;
+    }
+
+    /**
+     * @param ip the correo to set
+     */
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+    
     /**
      * @return the idpedido
      */

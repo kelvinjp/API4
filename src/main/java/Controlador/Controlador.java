@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -130,11 +132,11 @@ public class Controlador {
     @RequestMapping("/menu")
     public @ResponseBody ArrayList<Comidas> getComidas(){
        System.out.println("++===Retornado Comidas==");
-        
+        int categoria = 0; 
         Statement stmt;
        ArrayList<Comidas> comidas;
             comidas = new ArrayList<Comidas>();
-       String querry =  "SELECT * FROM comidas";
+       String querry =  "SELECT * FROM comidas order by tipo asc";
         ModeloDatos md = ModeloDatos.getInstance();
       
        try{
@@ -149,6 +151,10 @@ public class Controlador {
                      String descripcion =rs.getString("descripcion"); 
                      int tipo=rs.getInt("tipo");
                      Comidas cmds = new Comidas(id, nombre, precio, descripcion, tipo);
+                     if(tipo!=categoria){
+                         categoria = tipo; 
+                         comidas.add(new Comidas(0, "", 0.8, "", tipo)); 
+                     }
                      comidas.add(cmds);
                
             }
@@ -351,9 +357,31 @@ public class Controlador {
         -----------------------------------PEDIDOS--------------------
         */
 	@RequestMapping(value ="/verOrden", method = RequestMethod.POST)
-	public @ResponseBody Pedido getOrden(@RequestBody int idpdd) {
+        
+	public @ResponseBody Pedido getOrden(@RequestBody String uidd) {
+                    
 		
+            
+            int idpdd=0; 
+            
              Statement stmt;
+             String sql= "SELECT * FROM uuid where uuid='"+uidd+"'";  
+             try{
+                  ModeloDatos md = ModeloDatos.getInstance();
+                  md.connectar();
+                  stmt = ModeloDatos.getInstance().getConn().createStatement();
+                  ResultSet rs = stmt.executeQuery(sql);
+                  if(rs.next()){
+                    idpdd = rs.getInt("idpedido");                    
+                  }
+                  else{
+                      Pedido p = new Pedido(); 
+                      p.setIdpedido(-1);
+                      return p; 
+                  }
+             }catch(Exception e){
+                 e.printStackTrace();
+             }
        int idpedido=-1;
        Pedido p = new Pedido();
        ArrayList<comidasxpedido> detalles = new ArrayList<comidasxpedido>() ; 
@@ -380,6 +408,7 @@ public class Controlador {
                      double precio = rs.getDouble("precio");
                      String descripcion=rs.getString("descripcion");
                      int tipo=rs.getInt("tipo"); 
+                     String ip = rs.getString("ip");
                      
                      detalles = new ArrayList<comidasxpedido>();
                      
@@ -396,6 +425,7 @@ public class Controlador {
                      p.setEstado(estado);
                      p.setIdpedido(idpedido);
                      p.setOrden(detalles);
+                     p.setIp(ip);
                      //agregamos la nueva factura 
                      
                      //obtenemos el producto de esa fila 
@@ -434,7 +464,6 @@ public class Controlador {
 		logger.info("Actulalizando Pedido");
                 
                 
-                Comidas mds = null; 
         ModeloDatos modelodatos;
              PreparedStatement pstmt;
         
@@ -459,26 +488,31 @@ public class Controlador {
 	/**
          * Crea un nuevo pedido 
          * @param pedido
+     * @param request
          * @return 
          */
 	@RequestMapping(value = "/rest/emp/create", method = RequestMethod.POST)
-	public @ResponseBody Pedido crearPedido(@RequestBody Pedido pedido
-                ) {
+	public @ResponseBody Pedido crearPedido(@RequestBody Pedido pedido,
+                HttpServletRequest request) {
+            //is client behind something?
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");  
+        if (ipAddress == null) {  
+	   ipAddress = request.getRemoteAddr();  
+            }
             
             
-             int completada =0;
-        PreparedStatement pstmt1 = null;
-        PreparedStatement pstmt2 = null;
-        PreparedStatement pstmt3 = null;
+        PreparedStatement pstmt1;
+        PreparedStatement pstmt2;
+        PreparedStatement pstmt3;
         ModeloDatos md = ModeloDatos.getInstance();
         //Connection conn;
         
-        String sql1 = null;
-        String sql2 = null;
-        String sql3 = null;
+        String sql1;
+        String sql2;
+        String sql3;
         int idpedido = 0; 
                
-        sql1  = "INSERT INTO `pedidos` (`correo`,`estado`) VALUES (?,?) ";
+        sql1  = "INSERT INTO `pedidos` (`correo`,`estado`,`ip`) VALUES (?,?,?) ";
         
         sql2 = "INSERT INTO `comidasxpedido` (`idpedidos`, `comidas`,`cantidad`)"
                 + " VALUES(?,?,?)";
@@ -490,6 +524,7 @@ public class Controlador {
             pstmt1 = md.getConn().prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);           
             pstmt1.setString(1, pedido.getCorreo());
             pstmt1.setInt(2,pedido.getEstado() );  
+            pstmt1.setString(3, ipAddress);
             pstmt1.executeUpdate();
             ResultSet  rs = pstmt1.getGeneratedKeys();
             //--------------------Agregamos la fecha
@@ -515,12 +550,51 @@ public class Controlador {
                    pstmt2.executeUpdate();  
                 }                       
             }                               
+         agregarUUID(idpedido,pedido.getCorreo());
+         return pedido; 
         }
         catch(Exception e){
          e.printStackTrace();
-        }finally{
-            return getOrden(idpedido);
+        return pedido; 
         }
+        
+        }
+        public String agregarUUID(int idpedido, String correo){
+            UUID id = UUID.randomUUID(); 
+            String st = id.toString();
+            System.out.println(st);
+            
+             int completada =0;
+        PreparedStatement pstmt1 = null;
+        ModeloDatos md = ModeloDatos.getInstance();
+        //Connection conn;
+        
+        String sql1 = null;   
+        sql1  = "INSERT INTO `uuid` (`idpedido`,`uuid`) VALUES (?,?) ";
+        
+       
+        try{        
+            md.connectar();            
+            pstmt1 = md.getConn().prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);           
+            pstmt1.setInt(1, idpedido);
+            pstmt1.setString(2, st);
+            
+            pstmt1.executeUpdate();
+            
+             JavaMail email = new JavaMail(); 
+             String mensaje = "Gracias por preferirnos \n"
+                     + "Su codigo de seguimiento es: "+st;
+             System.out.println("Enviando correo a: "+correo);
+             
+            email.email("constructmarble@gmail.com", "ad0323ad", "", "", correo, "Nuevo Pedido", mensaje);
+           
+                return id.toString();
+               
+        }
+        catch(Exception e){
+            e.printStackTrace();         
+        }  
+             return "";
         }
 	 
     
@@ -559,6 +633,7 @@ public class Controlador {
                      double precio = rs.getDouble("precio");
                      String descripcion=rs.getString("descripcion");
                      int tipo=rs.getInt("tipo"); 
+                     String ip = rs.getString("ip");
                      
                      detalles = new ArrayList<comidasxpedido>();
                      
@@ -574,6 +649,7 @@ public class Controlador {
                      p.setEstado(estado);
                      p.setIdpedido(idpedido);
                      p.setOrden(detalles);
+                     p.setIp(ip);
                      //agregamos la nueva factura 
                      pedidos.add(p);
                      //obtenemos el producto de esa fila 
@@ -600,11 +676,6 @@ public class Controlador {
          return pedidos;
         }
     
-        
-        
-        
-        
-        
     /*
         -----------------------------------------------HORARIO
         

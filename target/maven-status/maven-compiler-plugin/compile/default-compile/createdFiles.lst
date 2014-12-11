@@ -5,10 +5,10 @@ Controlador\SimpleCORSFilter.class
 Controlador\Pedido.class
 Controlador\comidasxpedido.class
 Controlador\Orden.class
+Controlador\JavaMail.class
 Modelo\ModeloDatos.class
 Controlador\Cliente.class
 Controlador\Horario.class
 Controlador\Controlador.class
 Controlador\tiposdecomida.class
-Controlador\CustomizationBean.class
 Controlador\Usuario.class

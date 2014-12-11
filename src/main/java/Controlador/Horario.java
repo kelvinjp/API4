@@ -6,10 +6,7 @@
 
 package Controlador;
 
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 
 /**
@@ -43,21 +40,39 @@ public class Horario {
    * @return 
    */
   public boolean isTime2(int h, int m){
-       java.util.Date tiempo1 = new Time(h, m, 0); 
+      Calendar cal = Calendar.getInstance();
+      cal.set(Calendar.HOUR_OF_DAY, h);
+      cal.set(Calendar.MINUTE, m);
+	  java.util.Date tiempo1 = cal.getTime(); 
        
-       java.util.Date tiempo2 = new Time(horaApertura,minutoApertura,0);
-       java.util.Date tiempo3 = new Time(horacierre,minutocierre,0);
+	  Calendar cal2 = Calendar.getInstance();
+      cal2.set(Calendar.HOUR_OF_DAY, horaApertura);
+      cal2.set(Calendar.MINUTE, minutoApertura); 
+      
+       java.util.Date tiempo2 = cal2.getTime();
+       
+       Calendar cal3 = Calendar.getInstance();
+       cal3.set(Calendar.HOUR_OF_DAY, horacierre);
+       cal3.set(Calendar.MINUTE, minutocierre); 
+       java.util.Date tiempo3 = cal3.getTime();
        
       return tiempo1.after(tiempo2) && tiempo1.before(tiempo3);
   }
   public java.util.Date getHoraa(){
       
-       java.util.Date tiempo2 = new Time(horaApertura,minutoApertura,0);
+	  Calendar cal2 = Calendar.getInstance();
+      cal2.set(Calendar.HOUR_OF_DAY, horaApertura);
+      cal2.set(Calendar.MINUTE, minutoApertura); 
+      
+       java.util.Date tiempo2 = cal2.getTime();
        return tiempo2; 
   }
    public java.util.Date getHorac(){
       
-       java.util.Date tiempo3 = new Time(horacierre,minutocierre,0);
+	   Calendar cal3 = Calendar.getInstance();
+       cal3.set(Calendar.HOUR_OF_DAY, horacierre);
+       cal3.set(Calendar.MINUTE, minutocierre); 
+       java.util.Date tiempo3 = cal3.getTime();
        return tiempo3; 
   }
 
